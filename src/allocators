@@ -1,0 +1,95 @@
+#pragma once
+
+#include <cstdint>
+
+namespace u6th9d {
+    template <typename T>
+    class allocator {
+    public:
+        using value_type = T;
+        using pointer = T*;
+        using reference = T&;
+        using const_pointer = const T*;
+        using const_reference = const T&;
+        using size_type = size_t;
+        using difference_type = ptrdiff_t;
+
+        template <typename Other>
+        struct rebind {
+            using other = allocator<Other>;
+        };
+
+        allocator() { }
+
+        allocator(const allocator& alloc) { }
+
+        template <typename U>
+        allocator(const allocator<U>& alloc) { }
+
+        pointer allocate(size_type size) {
+            if (size == 0 || size > max_size()) {
+                return nullptr;
+            }
+            size = size * sizeof(value_type);
+            if (size == 0) {
+                size = 1;
+            }
+            // std::cout << "allocate: " << size << std::endl;
+            return reinterpret_cast<pointer>(::operator new(size));
+        }
+
+        pointer allocate(size_type size, const void*) {
+            return allocate(size);
+        }
+
+        pointer address(reference x) const {
+            return &x;
+        }
+
+        const_pointer address(const_reference x) const {
+            return &x;
+        }
+
+        void deallocate(void* ptr, size_type size) {
+            // size = size * sizeof(value_type);
+            // std::cout << "deallocate: " << size << std::endl;
+            ::operator delete(ptr);
+        }
+
+        size_type max_size() {
+            return static_cast<size_type>(-1) / sizeof(value_type);
+        }
+
+        template <typename U>
+        void construct(U* p, const U& val) {
+            // std::cout << "construct" << std::endl;
+            new (reinterpret_cast<void*>(p)) U(val);
+        }
+
+        template <typename U>
+        void destroy(U* p) {
+            // std::cout << "destroy" << std::endl;
+            p->~U();
+        }
+    };
+
+    template <>
+    class allocator<void> {
+    public:
+        using value_type = void;
+        using pointer = void*;
+        using const_pointer = const void*;
+
+        template <typename Other>
+        struct rebind {
+            using other = allocator<Other>;
+        };
+
+        allocator() { }
+
+        allocator(const allocator& alloc) { }
+
+        template <typename U>
+        allocator(const allocator<U>& alloc) { }
+    };
+}
