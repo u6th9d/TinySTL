@@ -1,0 +1,91 @@
+#pragma once
+
+#include <cstdint>
+
+namespace u6th9d {
+    template <typename T, size_t Size>
+    class array {
+    public:
+        using value_type = T;
+        using pointer = T*;
+        using reference = T&;
+        using const_pointer = const T*;
+        using const_reference = const T&;
+        using size_type = size_t;
+        using difference_type = ptrdiff_t;
+        using iterator = T*;
+        using const_iterator = const T*;
+
+        iterator begin() {
+            return &elem_[0];
+        }
+
+        iterator end() {
+            return &elem_[Size];
+        }
+
+        const_iterator cbegin() {
+            return &elem_[0];
+        }
+
+        const_iterator cend() {
+            return &elem_[Size];
+        }
+
+        size_type size() {
+            return Size;
+        }
+
+        size_type max_size() {
+            return Size;
+        }
+
+        size_type empty() {
+            return false;
+        }
+
+        reference operator[](size_type pos) {
+            return elem_[pos];
+        }
+
+        reference at(size_type pos) {
+            if (pos >= Size) {
+                throw "out_of_range";
+            } else {
+                return elem_[pos];
+            }
+        }
+
+        reference front() {
+            return elem_[0];
+        }
+
+        reference back() {
+            return elem_[Size - 1];
+        }
+
+        pointer data() {
+            return elem_;
+        }
+
+        void fill(const_reference val) {
+            ::memmove(elem_, &val, Size * sizeof(value_type));
+        }
+
+        void swap(array<value_type, Size>& other) {
+            for (int i = 0; i < Size; i++) {
+                auto tmp = (*this)[i];
+                (*this)[i] = other[i];
+                other[i] = tmp;
+            }
+        }
+
+        T elem_[Size];
+    };
+
+    template <typename T>
+    class array<T, 0> {
+    public:
+        array(...) = delete;
+    };
+}
